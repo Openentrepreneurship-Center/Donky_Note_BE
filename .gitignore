@@ -38,3 +38,8 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# 실제 회의 데이터 (민감 정보 — 커밋 금지)
+case.txt
+cases/
+*.case.txt

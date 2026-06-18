@@ -2,7 +2,7 @@
 
 흐름:
     1차 LLM 호출 - 어떤 요약 프레임워크가 적합한지 판단 (operations / planning /
-       solving / retrospective / reporting 중 하나).
+       solving / kpt / reporting 중 하나).
     2차 LLM 호출 - 선택된 프레임워크 프롬프트로 본문 요약.
 """
 
