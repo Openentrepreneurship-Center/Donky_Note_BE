@@ -93,7 +93,7 @@ def _summarize_with_framework(
     )
     completion = client.chat.completions.create(
         model=DEFAULT_SUMMARY_MODEL,
-        temperature=0.2,
+        temperature=0,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
