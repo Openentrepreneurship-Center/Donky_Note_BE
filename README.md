@@ -1,4 +1,3 @@
-# DonkeyNote STT & Summarize API
 
 회의/강의 오디오를 **화자분리 STT로 전사**한 뒤, 회의 성격에 맞는 **프레임워크를 LLM이 자동 선택해 요약**해주는 FastAPI 백엔드입니다.
 
