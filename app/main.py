@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.schemas import (
     ErrorResponse,
+    FrameworkInfo,
     SummarizeRequest,
     SummarizeResponse,
     TranscribeResponse,
@@ -14,6 +15,7 @@ from app.schemas import (
 )
 import uuid
 
+from app.prompts import FRAMEWORK_CATALOG
 from app.services import audit_log
 from app.services.postprocess import assemble_transcript
 from app.services.summarizer import (
@@ -47,6 +49,7 @@ app = FastAPI(
         {"name": "health", "description": "헬스체크"},
         {"name": "stt", "description": "오디오 전사 (화자분리 포함)"},
         {"name": "summarize", "description": "전사 결과 자동 요약"},
+        {"name": "frameworks", "description": "지원 요약 프레임워크 목록"},
     ],
 )
 
@@ -76,6 +79,20 @@ def raise_api_error(
 @app.get("/health", tags=["health"], summary="헬스체크")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get(
+    "/frameworks",
+    response_model=list[FrameworkInfo],
+    tags=["frameworks"],
+    summary="지원 요약 프레임워크 목록",
+)
+def list_frameworks() -> list[FrameworkInfo]:
+    """요약 시 사용할 수 있는 프레임워크 목록을 반환.
+
+    각 항목의 `framework` 값을 `POST /summarize`의 framework 필드로 강제 지정할 수 있다.
+    """
+    return [FrameworkInfo(**item) for item in FRAMEWORK_CATALOG]
 
 
 @app.exception_handler(RequestValidationError)

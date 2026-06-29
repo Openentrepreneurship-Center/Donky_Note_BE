@@ -27,6 +27,24 @@ class TranscribeResponse(BaseModel):
     message: str | None = None
 
 
+class FrameworkInfo(BaseModel):
+    """요약 프레임워크 1개의 공개 메타데이터."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "framework": "operations",
+                "frameworkKo": "운영 관리",
+                "description": "지속 가능한 정기 업무 및 서비스 유지보수를 위한 프로세스 관리 프레임워크",
+            }
+        }
+    )
+
+    framework: str = Field(..., description="프레임워크 식별자 (요약 API의 framework 값)")
+    frameworkKo: str = Field(..., description="프레임워크 한글 이름 (UI 노출용)")
+    description: str = Field(..., description="프레임워크 설명")
+
+
 class SegmentTimestamp(BaseModel):
     start: float = Field(..., description="음성파일 내 발화 시작 시각(초, 파일 시작점 기준 경과)")
     end: float = Field(..., description="음성파일 내 발화 종료 시각(초, 파일 시작점 기준 경과)")
