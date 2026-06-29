@@ -3,9 +3,14 @@
 from app.prompts.common import build_prompt
 
 NAME = "kpt"
+NAME_KO = "KPT 회고"
 DESCRIPTION = (
     "KPT: 회고 회의. Keep(잘한 점)/Problem(문제점)/Try(개선 시도)로 지나간 "
     "활동을 돌아보는 형식에 적합."
+)
+LIST_DESCRIPTION = (
+    "Keep(유지할 점), Problem(문제점), Try(개선 시도)를 바탕으로 진행하는 "
+    "문제·원인·해결책 중심의 회고 프레임워크"
 )
 
 OUTPUT_FORMAT = """\

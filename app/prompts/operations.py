@@ -3,9 +3,13 @@
 from app.prompts.common import build_prompt
 
 NAME = "operations"
+NAME_KO = "운영 관리"
 DESCRIPTION = (
     "Operations: 운영/실행 중심 회의. 처리할 업무, 담당자, 마감, 진행 상태 등 "
     "현재 돌아가는 일의 상태 점검에 적합."
+)
+LIST_DESCRIPTION = (
+    "지속 가능한 정기 업무 및 서비스 유지보수를 위한 프로세스 관리 프레임워크"
 )
 
 OUTPUT_FORMAT = """\

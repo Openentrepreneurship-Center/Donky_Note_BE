@@ -3,9 +3,13 @@
 from app.prompts.common import build_prompt
 
 NAME = "solving"
+NAME_KO = "문제 해결"
 DESCRIPTION = (
     "Solving: 문제 해결 회의. 문제 정의, 원인 분석, 대안, 결정, 다음 액션 "
     "같이 이슈를 푸는 흐름이 중심일 때 적합."
+)
+LIST_DESCRIPTION = (
+    "발생한 이슈의 근본 원인을 분석하고 구조적인 해결책을 도출하는 프레임워크"
 )
 
 OUTPUT_FORMAT = """\

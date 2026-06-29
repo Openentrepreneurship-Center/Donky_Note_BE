@@ -3,9 +3,13 @@
 from app.prompts.common import build_prompt
 
 NAME = "planning"
+NAME_KO = "기획/계획"
 DESCRIPTION = (
     "Planning: 계획 수립 회의. 목표, 일정, 리소스, 단계, 우선순위 같은 "
     "앞으로 무엇을 어떻게 할지 설계하는 내용에 적합."
+)
+LIST_DESCRIPTION = (
+    "목표 설정, 리소스 분배 및 마일스톤 수립을 위한 전략적 계획 프레임워크"
 )
 
 OUTPUT_FORMAT = """\

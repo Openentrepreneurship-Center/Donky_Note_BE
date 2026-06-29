@@ -3,9 +3,14 @@
 from app.prompts.common import build_prompt
 
 NAME = "reporting"
+NAME_KO = "보고"
 DESCRIPTION = (
     "Reporting: 보고/공유 중심. 상태 보고, 결과 발표, 수치 공유, KPI 등 "
     "정보 전달이 주된 목적인 자리에 적합."
+)
+LIST_DESCRIPTION = (
+    "진행 상황, 성과 및 리스크를 핵심 요약하여 이해관계자에게 전달하는 "
+    "문서화 프레임워크"
 )
 
 OUTPUT_FORMAT = """\
