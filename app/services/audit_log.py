@@ -10,11 +10,13 @@
     {prefix}/{YYYY-MM-DD}/stt/{job_id}/result.json
     {prefix}/{YYYY-MM-DD}/summarize/{request_id}/request.json
     {prefix}/{YYYY-MM-DD}/summarize/{request_id}/response.json
+    {prefix}/{audio_folder}/{YYYY-MM-DD}/{job_id}/source{ext}  ← 음성 원본(별도 폴더)
 
 환경변수:
     AWS_S3_LOG_BUCKET       - 필수. 로그 적재 버킷 이름
     AWS_REGION              - 필수. 버킷 리전 (예: ap-northeast-2)
     AWS_S3_LOG_PREFIX       - 선택. 키 prefix (기본 'donkey-note')
+    AWS_S3_AUDIO_FOLDER     - 선택. 음성 원본 폴더명 (기본 'audio')
     AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY - 선택. IAM Role 쓰면 생략 가능
 """
 
@@ -34,6 +36,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 logger = logging.getLogger(__name__)
 
 DEFAULT_PREFIX = "donkey-note"
+DEFAULT_AUDIO_FOLDER = "audio"
 
 
 @lru_cache(maxsize=1)
@@ -54,6 +57,37 @@ def _bucket() -> str | None:
 
 def _prefix() -> str:
     return os.environ.get("AWS_S3_LOG_PREFIX", DEFAULT_PREFIX).strip("/")
+
+
+def _audio_folder() -> str:
+    """음성 원본을 적재할 별도 폴더명 (텍스트 로그와 분리)."""
+    return os.environ.get("AWS_S3_AUDIO_FOLDER", DEFAULT_AUDIO_FOLDER).strip("/")
+
+
+# content-type → 확장자 매핑 (filename에 확장자가 없을 때 fallback).
+_CONTENT_TYPE_EXT = {
+    "audio/wav": ".wav",
+    "audio/x-wav": ".wav",
+    "audio/mpeg": ".mp3",
+    "audio/mp3": ".mp3",
+    "audio/mp4": ".m4a",
+    "audio/x-m4a": ".m4a",
+    "audio/webm": ".webm",
+    "audio/ogg": ".ogg",
+}
+
+
+def _audio_ext(filename: str | None, content_type: str | None) -> str:
+    """원본 파일명 확장자 우선, 없으면 content-type 매핑, 그것도 없으면 .bin."""
+    if filename:
+        ext = os.path.splitext(filename)[1]
+        if ext:
+            return ext.lower()
+    if content_type:
+        mapped = _CONTENT_TYPE_EXT.get(content_type.split(";")[0].strip().lower())
+        if mapped:
+            return mapped
+    return ".bin"
 
 
 def _today() -> str:
@@ -80,11 +114,53 @@ def _put_json(key: str, payload: dict[str, Any]) -> None:
         print(f"[audit_log] put_object failed for {key}: {exc}", file=sys.stderr)
 
 
+def _put_bytes(key: str, body: bytes, content_type: str) -> None:
+    """바이너리(음성 원본) best-effort 업로드. 실패해도 서비스 흐름 불방해."""
+    bucket = _bucket()
+    client = _s3_client()
+    if not bucket or client is None:
+        # 환경변수 미설정 → 적재 비활성화. 서비스에는 영향 없음.
+        return
+
+    try:
+        client.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=body,
+            ContentType=content_type,
+        )
+    except (BotoCoreError, ClientError) as exc:
+        # best-effort: 절대 호출자에게 전파하지 않음.
+        print(f"[audit_log] put_object(audio) failed for {key}: {exc}", file=sys.stderr)
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 # --- STT ----------------------------------------------------------------
+
+def log_stt_audio(
+    *,
+    job_id: str,
+    filename: str | None,
+    content_type: str | None,
+    audio_bytes: bytes,
+) -> None:
+    """STT 음성 원본을 별도 폴더에 적재.
+
+    키: {prefix}/{audio_folder}/{YYYY-MM-DD}/{job_id}/source{ext}
+    텍스트 로그({prefix}/{date}/stt/...)와 폴더가 분리돼 S3 lifecycle를
+    음성에만 따로 걸 수 있다.
+    """
+    ext = _audio_ext(filename, content_type)
+    key = f"{_prefix()}/{_audio_folder()}/{_today()}/{job_id}/source{ext}"
+    _put_bytes(
+        key,
+        audio_bytes,
+        content_type or "application/octet-stream",
+    )
+
 
 def log_stt_request(
     *,

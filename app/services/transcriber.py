@@ -215,6 +215,12 @@ def enqueue_transcription(
         content_type=audio_file.content_type,
         size_bytes=len(audio_bytes),
     )
+    audit_log.log_stt_audio(
+        job_id=job_id,
+        filename=audio_file.filename,
+        content_type=audio_file.content_type,
+        audio_bytes=audio_bytes,
+    )
 
     runner_args = (
         job_id,
